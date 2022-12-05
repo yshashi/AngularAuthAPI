@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "D:\\SASHI_YADAV\\Projects\\CompleteAuthinAngular\\AngularAuthAPI\\AngularAuthAPI\\AngularAuthAPI.csproj": {}
+    "D:\\Sashi\\Projects\\CompleteAuth\\AngularAuthAPI\\AngularAuthAPI\\AngularAuthAPI.csproj": {}
   },
   "projects": {
-    "D:\\SASHI_YADAV\\Projects\\CompleteAuthinAngular\\AngularAuthAPI\\AngularAuthAPI\\AngularAuthAPI.csproj": {
+    "D:\\Sashi\\Projects\\CompleteAuth\\AngularAuthAPI\\AngularAuthAPI\\AngularAuthAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\SASHI_YADAV\\Projects\\CompleteAuthinAngular\\AngularAuthAPI\\AngularAuthAPI\\AngularAuthAPI.csproj",
+        "projectUniqueName": "D:\\Sashi\\Projects\\CompleteAuth\\AngularAuthAPI\\AngularAuthAPI\\AngularAuthAPI.csproj",
         "projectName": "AngularAuthAPI",
-        "projectPath": "D:\\SASHI_YADAV\\Projects\\CompleteAuthinAngular\\AngularAuthAPI\\AngularAuthAPI\\AngularAuthAPI.csproj",
-        "packagesPath": "C:\\Users\\sashi\\.nuget\\packages\\",
-        "outputPath": "D:\\SASHI_YADAV\\Projects\\CompleteAuthinAngular\\AngularAuthAPI\\AngularAuthAPI\\obj\\",
+        "projectPath": "D:\\Sashi\\Projects\\CompleteAuth\\AngularAuthAPI\\AngularAuthAPI\\AngularAuthAPI.csproj",
+        "packagesPath": "C:\\Users\\Asus\\.nuget\\packages\\",
+        "outputPath": "D:\\Sashi\\Projects\\CompleteAuth\\AngularAuthAPI\\AngularAuthAPI\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\sashi\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Asus\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -81,7 +85,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -93,7 +98,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.108\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.100\\RuntimeIdentifierGraph.json"
         }
       }
     }

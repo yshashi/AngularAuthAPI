@@ -10,6 +10,9 @@ namespace AngularAuthAPI.MappingConfigs
         {
             CreateMap<User, UserDto>();
             CreateMap<UserDto, User>();
+            CreateMap<User, RegisterDto>();
+            CreateMap<RegisterDto, User>();
+
         }
     }
 }

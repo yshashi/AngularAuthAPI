@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -49,11 +48,12 @@ namespace AngularAuthAPI.Controllers
             return Ok(user);
         }
 
-        [HttpPost("add")]
-        public async Task<IActionResult> AddUser([FromBody] User userObj)
+        [HttpPost("register")]
+        public async Task<IActionResult> AddUser([FromBody] RegisterDto registerDto)
         {
             try
             {
+                var userObj = _mapper.Map<User>(registerDto);
                 // check email
                 if (await checkEmailExistAsync(userObj.Email))
                     return BadRequest(new { Message="Email Already Exist" });
@@ -84,7 +84,7 @@ namespace AngularAuthAPI.Controllers
             }
         }
 
-        //[Authorize(Roles = "User")]
+        [Authorize(Roles = "User")]
         [HttpGet]
         public async Task<ActionResult<List<User>>> GetAllUsers()
         {
@@ -101,7 +101,7 @@ namespace AngularAuthAPI.Controllers
             //    })
             //    .ToListAsync();
             var users = _mapper.Map<List<User>, List<UserDto>>(await _context.Users.ToListAsync());
-            return Ok(await _context.Users.ToListAsync());
+            return Ok(users);
         }
 
         private string CreateToken(User user)
@@ -110,14 +110,16 @@ namespace AngularAuthAPI.Controllers
             var key = Encoding.ASCII.GetBytes(_configuration.GetSection("AppSettings:SecretKey").Value);
             var identity = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Role, user.Role)
+                    new Claim(ClaimTypes.Role, user.Role),
+                    new Claim(ClaimTypes.Email,user.Email),
+                    new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}")
                 });
             var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = identity,
-                Expires = DateTime.Now.AddDays(2),
+                Expires = DateTime.Now.AddDays(1),
                 SigningCredentials = credentials
             };
 

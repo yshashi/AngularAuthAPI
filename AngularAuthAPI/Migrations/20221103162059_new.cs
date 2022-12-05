@@ -4,7 +4,7 @@
 
 namespace AngularAuthAPI.Migrations
 {
-    public partial class v1 : Migration
+    public partial class @new : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
