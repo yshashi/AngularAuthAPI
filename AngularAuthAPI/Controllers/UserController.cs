@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -43,9 +44,20 @@ namespace AngularAuthAPI.Controllers
                 return BadRequest(new { message = "Log in failed" });
 
             user.Token = CreateToken(user);
+            user.RefreshToken = CreateRefreshToken();
+            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
             UserDto userDto = _mapper.Map<UserDto>(user);
 
-            return Ok(user);
+            
+
+            return Ok(new
+            {
+                AccessToken = user.Token,
+                RefreshToken = user.RefreshToken
+            });
         }
 
         [HttpPost("register")]
@@ -104,6 +116,32 @@ namespace AngularAuthAPI.Controllers
             return Ok(users);
         }
 
+
+        [HttpPost]
+        [Route("refresh")]
+        public async Task<IActionResult> Refresh(TokenApiDto TokenApiDto)
+        {
+            if (TokenApiDto is null)
+                return BadRequest("Invalid client request");
+            string accessToken = TokenApiDto.AccessToken;
+            string refreshToken = TokenApiDto.RefreshToken;
+            var principal = GetPrincipalFromExpiredToken(accessToken);
+            var username = principal.Identity.Name; //this is mapped to the Name claim by default
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
+                return BadRequest("Invalid client request");
+            var newAccessToken = CreateToken(user);
+            var newRefreshToken = CreateRefreshToken();
+            user.RefreshToken = newRefreshToken;
+            await _context.SaveChangesAsync();
+            return Ok(new TokenApiDto()
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken
+            });
+        }
+        
+    
         private string CreateToken(User user)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
@@ -112,14 +150,14 @@ namespace AngularAuthAPI.Controllers
                 {
                     new Claim(ClaimTypes.Role, user.Role),
                     new Claim(ClaimTypes.Email,user.Email),
-                    new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}")
+                    new Claim(ClaimTypes.Name, $"{user.Username}")
                 });
             var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = identity,
-                Expires = DateTime.Now.AddDays(1),
+                Expires = DateTime.Now.AddSeconds(10),
                 SigningCredentials = credentials
             };
 
@@ -127,6 +165,39 @@ namespace AngularAuthAPI.Controllers
             return jwtTokenHandler.WriteToken(token);
         }
 
+        private string CreateRefreshToken()
+        {
+            var tokenBytes = RandomNumberGenerator.GetBytes(64);
+            var refreshtoken = Convert.ToBase64String(tokenBytes);
+
+            var tokenIsInUser = _context.Users
+            .Any(_ => _.RefreshToken == refreshtoken);
+
+            if (tokenIsInUser)
+            {
+                return CreateRefreshToken();
+            }
+            return refreshtoken;
+        }
+
+        private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false, //you might want to validate the audience and issuer depending on your use case
+                ValidateIssuer = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["AppSettings:SecretKey"])),
+                ValidateLifetime = false //here we are saying that we don't care about the token's expiration date
+            };
+            var tokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken securityToken;
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+            var jwtSecurityToken = securityToken as JwtSecurityToken;
+            if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                throw new SecurityTokenException("Invalid token");
+            return principal;
+        }
         private Task<bool> checkEmailExistAsync(string email)
             => _context.Users.AnyAsync(x => x.Email == email);
 
