@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AngularAuthAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20221205102802_removedRefreshtokenmodel")]
-    partial class removedRefreshtokenmodel
+    [Migration("20221226111448_resetpasswordmodels")]
+    partial class resetpasswordmodels
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

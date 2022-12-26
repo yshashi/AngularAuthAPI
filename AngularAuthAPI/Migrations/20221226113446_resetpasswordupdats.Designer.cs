@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AngularAuthAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20221205100838_refreshtokenmodelv1")]
-    partial class refreshtokenmodelv1
+    [Migration("20221226113446_resetpasswordupdats")]
+    partial class resetpasswordupdats
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,28 +23,6 @@ namespace AngularAuthAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
-
-            modelBuilder.Entity("AngularAuthAPI.Models.RefreshToken", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Token")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("TokenExpirationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("refreshtoken", (string)null);
-                });
 
             modelBuilder.Entity("AngularAuthAPI.Models.User", b =>
                 {
@@ -64,6 +42,19 @@ namespace AngularAuthAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("RefreshTokenExpiryTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ResetPasswordExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ResetPasswordToken")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")

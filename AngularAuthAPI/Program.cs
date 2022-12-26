@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.Text;
+using SendGrid;
+using SendGrid.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +43,13 @@ builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("SQLServer"));
 });
+
+builder.Services.AddSendGrid(x =>
+{
+    x.ApiKey = builder.Configuration["EmailSettings:APIKey"];   
+});
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -80,6 +89,7 @@ app.UseHttpsRedirection();
 app.UseCors("MyPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSession();
 
 app.MapControllers();
 

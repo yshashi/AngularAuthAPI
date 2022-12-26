@@ -1,31 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Sashi\\Projects\\CompleteAuth\\AngularAuthAPI\\AngularAuthAPI\\AngularAuthAPI.csproj": {}
+    "/Users/sashikumaryadav/Desktop/Sashi/YoutubeProjects/AngularAuthAPI/AngularAuthAPI/AngularAuthAPI.csproj": {}
   },
   "projects": {
-    "D:\\Sashi\\Projects\\CompleteAuth\\AngularAuthAPI\\AngularAuthAPI\\AngularAuthAPI.csproj": {
+    "/Users/sashikumaryadav/Desktop/Sashi/YoutubeProjects/AngularAuthAPI/AngularAuthAPI/AngularAuthAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Sashi\\Projects\\CompleteAuth\\AngularAuthAPI\\AngularAuthAPI\\AngularAuthAPI.csproj",
+        "projectUniqueName": "/Users/sashikumaryadav/Desktop/Sashi/YoutubeProjects/AngularAuthAPI/AngularAuthAPI/AngularAuthAPI.csproj",
         "projectName": "AngularAuthAPI",
-        "projectPath": "D:\\Sashi\\Projects\\CompleteAuth\\AngularAuthAPI\\AngularAuthAPI\\AngularAuthAPI.csproj",
-        "packagesPath": "C:\\Users\\Asus\\.nuget\\packages\\",
-        "outputPath": "D:\\Sashi\\Projects\\CompleteAuth\\AngularAuthAPI\\AngularAuthAPI\\obj\\",
+        "projectPath": "/Users/sashikumaryadav/Desktop/Sashi/YoutubeProjects/AngularAuthAPI/AngularAuthAPI/AngularAuthAPI.csproj",
+        "packagesPath": "/Users/sashikumaryadav/.nuget/packages/",
+        "outputPath": "/Users/sashikumaryadav/Desktop/Sashi/YoutubeProjects/AngularAuthAPI/AngularAuthAPI/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Asus\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/Users/sashikumaryadav/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "/usr/local/share/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -56,6 +51,10 @@
               "target": "Package",
               "version": "[6.0.8, )"
             },
+            "Microsoft.AspNetCore.Session": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[6.0.8, )"
@@ -69,6 +68,14 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[6.0.8, )"
+            },
+            "SendGrid": {
+              "target": "Package",
+              "version": "[9.28.1, )"
+            },
+            "SendGrid.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[1.0.1, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
@@ -98,7 +105,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.100\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.101/RuntimeIdentifierGraph.json"
         }
       }
     }

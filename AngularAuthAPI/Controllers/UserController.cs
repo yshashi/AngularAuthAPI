@@ -2,11 +2,15 @@
 using AngularAuthAPI.Helpers;
 using AngularAuthAPI.Models;
 using AngularAuthAPI.Models.DTO_s;
+using AngularAuthAPI.Models.DTOs;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -22,11 +26,15 @@ namespace AngularAuthAPI.Controllers
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
-        public UserController(AppDbContext context, IConfiguration configuration, IMapper mapper)
+        private readonly ISendGridClient _sendGridClient;
+        const string SessionName = "emailToken";
+        const string SessionAge = "emailTokenExpiry";
+        public UserController(AppDbContext context, IConfiguration configuration, IMapper mapper, ISendGridClient sendGridClient)
         {
             _context = context;
             _configuration = configuration;
             _mapper = mapper;
+            _sendGridClient = sendGridClient;
         }
 
         [HttpPost("authenticate")]
@@ -51,7 +59,7 @@ namespace AngularAuthAPI.Controllers
 
             UserDto userDto = _mapper.Map<UserDto>(user);
 
-            
+
 
             return Ok(new
             {
@@ -68,14 +76,14 @@ namespace AngularAuthAPI.Controllers
                 var userObj = _mapper.Map<User>(registerDto);
                 // check email
                 if (await checkEmailExistAsync(userObj.Email))
-                    return BadRequest(new { Message="Email Already Exist" });
+                    return BadRequest(new { Message = "Email Already Exist" });
 
                 //check username
                 if (await checkUsernameExistAsync(userObj.Username))
                     return BadRequest(new { Message = "Username Already Exist" });
 
                 var passMessage = CheckPasswordStrength(userObj.Password);
-                if(!string.IsNullOrEmpty(passMessage))
+                if (!string.IsNullOrEmpty(passMessage))
                     return BadRequest(new { Message = passMessage.ToString() });
 
                 userObj.Password = PasswordHasher.HashPassword(userObj.Password);
@@ -100,18 +108,6 @@ namespace AngularAuthAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<List<User>>> GetAllUsers()
         {
-            //return await _context.Users
-            //    .Select(x => new User()
-            //    {
-            //        Id = x.Id,
-            //        FirstName = x.FirstName,
-            //        LastName = x.LastName,
-            //        Username = x.Username,
-            //        Password = null,
-            //        Role = x.Role,
-            //        Email = x.Email
-            //    })
-            //    .ToListAsync();
             var users = _mapper.Map<List<User>, List<UserDto>>(await _context.Users.ToListAsync());
             return Ok(users);
         }
@@ -140,8 +136,73 @@ namespace AngularAuthAPI.Controllers
                 RefreshToken = newRefreshToken
             });
         }
-        
-    
+
+        [HttpPost]
+        [Route("send-reset-email/{email}")]
+        public async Task<IActionResult> SendEmail(string email)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(a => a.Email == email);
+            if (user is null)
+                return NotFound(new
+                {
+                    StatusCode = 404,
+                    Message = "Email Doesn't Exist"
+                });
+            var tokenBytes = RandomNumberGenerator.GetBytes(64);
+            var emailToken = Convert.ToBase64String(tokenBytes);
+            user.ResetPasswordToken = emailToken;
+            user.ResetPasswordExpiry = DateTime.Now.AddMinutes(5);
+            string from = _configuration["EmailSettings:From"];
+            string fromName = "Let's Program";
+            var msg = new SendGridMessage()
+            {
+                From = new EmailAddress(from, fromName),
+                Subject = "Reset Password!",
+                HtmlContent = EmailBody.EmailStringBody(email,emailToken)
+            };
+            msg.AddTo(email);
+            _context.Entry(user).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            var response = await _sendGridClient.SendEmailAsync(msg);
+            string message = response.IsSuccessStatusCode ? "Email Send" : "Email Not Sent";
+            return Ok(new
+            {
+                StatusCode = 200,
+                Message = message
+            });
+        }
+
+        [HttpPost]
+        [Route("reset-email")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto resetPasswordDto)
+        {
+            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(a => resetPasswordDto.Email == a.Email);
+            if (user is null)
+                return NotFound(new
+                {
+                    StatusCode = 404,
+                    Message = "No user found with this email!"
+                });
+            var tokenCode = user.ResetPasswordToken;
+            DateTime emailTokenExpiry = user.ResetPasswordExpiry;
+            var first = tokenCode != resetPasswordDto.EmailToken;
+            var second = emailTokenExpiry < DateTime.Now;
+            if ( first || second)
+                return NotFound(new
+                {
+                    StatusCode = 400,
+                    Message = "Invalid reset link!"
+                });
+            user.Password = PasswordHasher.HashPassword(resetPasswordDto.NewPassword);
+            _context.Entry(user).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return Ok(new
+            {
+                StatusCode = 200,
+                Message = "Password Reset Successfully!"
+            });
+        }
+
         private string CreateToken(User user)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
@@ -208,7 +269,7 @@ namespace AngularAuthAPI.Controllers
         {
             StringBuilder sb = new StringBuilder();
             if (pass.Length < 9)
-                sb.Append("Minimum password length should be 8"+Environment.NewLine);
+                sb.Append("Minimum password length should be 8" + Environment.NewLine);
             if (!(Regex.IsMatch(pass, "[a-z]") && Regex.IsMatch(pass, "[A-Z]") && Regex.IsMatch(pass, "[0-9]")))
                 sb.Append("Password should be AlphaNumeric" + Environment.NewLine);
             if (!Regex.IsMatch(pass, "[<,>,@,!,#,$,%,^,&,*,(,),_,+,\\[,\\],{,},?,:,;,|,',\\,.,/,~,`,-,=]"))
